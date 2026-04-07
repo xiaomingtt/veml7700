@@ -1,34 +1,35 @@
 # micropython
 # MIT license
 # Copyright (c) 2022 Roman Shevchik   goctaprog@gmail.com
-"""service class for I/O bus operation"""
+
+"""用于I/O总线操作的工具类"""
 
 from machine import I2C
 
 
 class BusAdapter:
-    """Proxy between I/O bus and device I/O class"""
+    """I/O总线与设备I/O类之间的代理类"""
     def __init__(self, bus):
         self.bus = bus
 
     def read_register(self, device_addr: int, reg_addr: int, bytes_count: int) -> bytes:
-        """считывает из регистра датчика значение.
-        device_addr - адрес датчика на шине.
-        reg_addr - адрес регистра в адресном пространстве датчика.
-        bytes_count - размер значения в байтах.
-        reads value from sensor register.
-        device_addr - address of the sensor on the bus.
-        reg_addr - register address in the address space of the sensor"""
+        """从传感器寄存器中读取值。
+        device_addr - 总线上的传感器地址。
+        reg_addr - 传感器地址空间中的寄存器地址。
+        bytes_count - 读取值的字节大小。
+        从传感器寄存器中读取值。
+        device_addr - 总线上的传感器地址。
+        reg_addr - 传感器地址空间中的寄存器地址"""
         raise NotImplementedError
 
     def write_register(self, device_addr: int, reg_addr: int, value: int,
                        bytes_count: int, byte_order: str):
-        """записывает данные value в датчик, по адресу reg_addr.
-        bytes_count - кол-во записываемых байт из value.
-        byte_order - порядок расположения байт в записываемом значении.
-        writes value data to the sensor, at reg_addr.
-        bytes_count - number of bytes written from value.
-        byte_order - the order of bytes in the value being written.
+        """将数据value写入传感器的reg_addr地址处。
+        bytes_count - 从value中写入的字节数。
+        byte_order - 待写入值中的字节排列顺序。
+        将数据value写入传感器的reg_addr地址处。
+        bytes_count - 从value中写入的字节数。
+        byte_order - 待写入值中的字节排列顺序。
         """
         raise NotImplementedError
 
@@ -45,14 +46,14 @@ class I2cAdapter(BusAdapter):
 
     def write_register(self, device_addr: int, reg_addr: int, value: int,
                        bytes_count: int, byte_order: str):
-        """записывает данные value в датчик, по адресу reg_addr.
-        bytes_count - кол-во записываемых данных"""
+        """将数据value写入传感器的reg_addr地址处。
+        bytes_count - 待写入数据的字节数"""
         buf = value.to_bytes(bytes_count, byte_order)
         return self.bus.writeto_mem(device_addr, reg_addr, buf)
 
     def read_register(self, device_addr: int, reg_addr: int, bytes_count: int) -> bytes:
-        """считывает из регистра датчика значение.
-        bytes_count - размер значения в байтах"""
+        """从传感器寄存器中读取值。
+        bytes_count - 读取值的字节大小"""
         return self.bus.readfrom_mem(device_addr, reg_addr, bytes_count)
 
     def read(self, device_addr, n_bytes: int) -> bytes:
